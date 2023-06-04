@@ -90,6 +90,25 @@ auto garden::User_c::reg(const drogon::HttpRequestPtr &req, CALL &&callback) -> 
     auto &origin = req->getHeader("Origin");
     auto callbackPtr = std::make_shared<CALL>(std::move(callback));
 
+
+
+    // boost::gregorian::date xGPWStart(1941, boost::gregorian::Jun, 22);
+    // boost::gregorian::date xNowdays = boost::gregorian::day_clock::local_day();
+
+    // const std::locale fmt(std::locale::classic(), new boost::gregorian::date_facet("%d.%m.%Y"));
+    // const std::string str_xGPWStart = date_to_string(xGPWStart, fmt);
+    // const std::string str_xNowdays = date_to_string(xNowdays, fmt);
+
+    // Json::Value ret;
+    // ret["xGPWStart"] = str_xGPWStart;
+    // ret["xNowdays"] = str_xNowdays;
+    // auto resp= drogon::HttpResponse::newHttpJsonResponse(ret);
+    // resp->setStatusCode(drogon::k200OK);
+    // resp->addHeader("Access-Control-Allow-Origin", origin);
+    // return (*callbackPtr)(resp);
+
+
+
     if(!jsonPtr)
     {
         Json::Value ret;
@@ -402,4 +421,12 @@ auto garden::User_c::set_indicator(const drogon::HttpRequestPtr &req, CALL &&cal
         resp->addHeader("Access-Control-Allow-Origin", origin);
         return (*callbackPtr)(resp);     
     }
+}
+
+auto garden::User_c::date_to_string(const boost::gregorian::date& date, const std::locale &fmt) -> std::string
+{
+    std::ostringstream os;
+    os.imbue(fmt);
+    os << date;
+    return os.str();
 }

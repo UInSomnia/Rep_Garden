@@ -6,6 +6,7 @@
 #include "models/User.h"
 #include "models/Indicator.h"
 
+#include "boost/date_time/gregorian/gregorian.hpp"
 #include "bcrypt.h"
 #include "tools/tools.h"
 
@@ -39,6 +40,8 @@ namespace garden
       auto reg(const drogon::HttpRequestPtr &req, CALL &&callback) -> void const;
       auto login(const drogon::HttpRequestPtr &req, CALL &&callback) -> void const;
       auto set_indicator(const drogon::HttpRequestPtr &req, CALL &&callback) -> void const;
+
+      static auto date_to_string(const boost::gregorian::date& date, const std::locale &fmt) -> std::string;
 
     private:
       std::string key_private;
