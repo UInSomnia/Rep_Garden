@@ -6,110 +6,400 @@
 
 // https://github.com/maikeulb/orgChartApi/blob/master/controllers/AuthController.cc
 
-namespace drogon
+garden::User_c::User_c()
 {
-    template <>
-    inline drogon_model::sqlite3::User fromRequest(const drogon::HttpRequest &req)
-    {
-        auto jsonPtr = req.getJsonObject();
-        auto json = *jsonPtr;
-        auto user = drogon_model::sqlite3::User(json);
-        return user;
-    }
+    key_public = std::string(R"(-----BEGIN PUBLIC KEY-----
+MIICIjANBgkqhkiG9w0BAQEFAAOCAg8AMIICCgKCAgEA5kbZMY/I+pz6eT4833Fz
+BHwA3L+40lR+oYgjCs3Nsxys/1Z5ffMj8tYRz/VbrBNbwHl0glIocNnOux8OyZzt
+Z3/Z2egNqo6f6tkr1ZqB5KO1Wns9iKv3prNzu/ffCOLbsvwMmyj66YpCH8k4sirV
+7xBpnPFZi8SDO+blf7FumSq7w1KSMnQdEeYJ82HQdvG2IvoJwI9qi4E/DAP7BmCh
++Dw887XVjReDiJ34gkDFEHfJyrh7fRoDksPxw2y+sUnY/1wD0XyTSIHGY5HxApXD
+h4Wz/ZLSVsyWpMPLwzyfJxW0XEpsYJjDDNOJBHJAeqVNcXyKbuBRTyGeCmutl7Ui
+o9KiDquQzlz5kzVVHuVmgYzi/tlLliAGitZcENiAiosWZEmqhZ47HUuLyrL3QotM
+7GsyBip7zrHCVTvnIHbXEvqibmQaY4TZPfW7T0m/2h1KDj7MOpj6shuiOf5i/S2J
+jMvc47cgi3l8kijv//n2ezuMT1jxaNjGw2zys2OqhU0AU4jFpxdWhYCxrX7uQJoE
+y0yIg0lKJl/dk/H4dP+RfEwbEzkOuLlDKeBUwXe6T4JhwHG/lk8m08p1oGsJHjcP
+uynvVcpMCcwDw5+qAaqBVItEw/qVJWQK5e/YXlqLpeuDfVElrshnouwgJnJNm5G9
+zLr4mHTHCdNE+YtCiKWQTmcCAwEAAQ==
+-----END PUBLIC KEY-----)");
+    key_private = std::string(R"(-----BEGIN RSA PRIVATE KEY-----
+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
+-----END RSA PRIVATE KEY-----)");
 }
 
-auto garden::User_c::reg(const drogon::HttpRequestPtr &req,
-                         CALL &&callback,
-                         drogon_model::sqlite3::User &&pUser) -> void const
+auto garden::User_c::reg(const drogon::HttpRequestPtr &req, CALL &&callback) -> void const
 {
-    LOG_DEBUG << "register new User ";
+    // +name
+    // +surname
+    // +patronymic
+    // +phone
+    // +mail
+    // +password
 
-    try
+    LOG_DEBUG << "Enter reg()";
+    auto jsonPtr = req->jsonObject();
+    Json::Value &req_json = *jsonPtr;
+    auto &origin = req->getHeader("Origin");
+    auto callbackPtr = std::make_shared<CALL>(std::move(callback));
+
+    if(!jsonPtr)
     {
+        Json::Value ret;
+        ret["error"]="No json object is found in the request";
+        auto resp= drogon::HttpResponse::newHttpJsonResponse(ret);
+        resp->setStatusCode(drogon::k400BadRequest);
+        resp->addHeader("Access-Control-Allow-Origin", origin);
+        return (*callbackPtr)(resp);
+    }
+
+    if(std::string err; !Tools::user_validate_json_for_creation(req_json, err))
+    {
+        Json::Value ret;
+        ret["error"] = err;
+        auto resp= drogon::HttpResponse::newHttpJsonResponse(ret);
+        resp->setStatusCode(drogon::k400BadRequest);
+        resp->addHeader("Access-Control-Allow-Origin", origin);
+        return (*callbackPtr)(resp);
+    }
+
+    try 
+    {
+        // {
+        //     OpenXLSX::XLDocument doc;
+        //     doc.create("test_excel_file.xlsx");
+        //     auto wbk = doc.workbook();
+        //     wbk.addWorksheet("Sheet_text");
+        //     // wbk.worksheet("Sheet_text").setActive();
+        //     auto wks = doc.workbook().worksheet("Sheet_text");
+
+        //     wks.cell("A1").value() = "Hello, OpenXLSX!";
+        //     wks.cell("B1").value() = 240;
+
+        //     doc.save();
+        //     doc.close();
+        // }
+
+        {
+            const std::string open = req_json["name"].asString();
+            req_json["name"] = Tools::rsa256_encrypt(open, key_private);
+        }
+        // const std::string decode = Tools::rsa256_decrypt(req_json["mail"].asString(), key_public);
+        // LOG_DEBUG << "result decode = " << decode;
+        {
+            const std::string open = req_json["surname"].asString();
+            req_json["surname"] = Tools::rsa256_encrypt(open, key_private);
+        }
+        {
+            const std::string open = req_json["patronymic"].asString();
+            req_json["patronymic"] = Tools::rsa256_encrypt(open, key_private);
+        }
+        {
+            const std::string open = req_json["phone"].asString();
+            req_json["phone"] = Tools::rsa256_encrypt(open, key_private);
+        }
+        {
+            const std::string open = req_json["mail"].asString();
+            req_json["mail"] = Tools::rsa256_encrypt(open, key_private);
+        }
+
+        {
+            const std::string password_open = req_json["password"].asString();
+            const std::string password_close = bcrypt::generateHash(password_open);
+            req_json["password"] = password_close;
+        }
+
+        req_json["id_role"]   = 0;
+        req_json["is_banned"] = 0;
+
+        USR object = USR(req_json);
         auto dbClientPtr = drogon::app().getDbClient();
-        drogon::orm::Mapper<drogon_model::sqlite3::User> mp(dbClientPtr);
-
-        if (!areFieldsValid(pUser))
-        {
-            Json::Value ret{};
-            ret["error"] = "missing fields";
-            auto resp = drogon::HttpResponse::newHttpJsonResponse(ret);
-            resp->setStatusCode(drogon::HttpStatusCode::k400BadRequest);
-            callback(resp);
-            return;
-        }
-        if (!isUserAvailable(pUser, mp))
-        {
-            Json::Value ret{};
-            ret["error"] = "username is taken";
-            auto resp = drogon::HttpResponse::newHttpJsonResponse(ret);
-            resp->setStatusCode(drogon::HttpStatusCode::k400BadRequest);
-            callback(resp);
-            return;
-        }
-
-        drogon_model::sqlite3::User newUser = pUser;
-        newUser.setPassword(bcrypt::generateHash(newUser.getValueOfPassword()));
-        mp.insertFuture(newUser).get();
-
-        auto userWithToken = garden::User_c::UserWithToken(newUser);
-        Json::Value ret = userWithToken.toJson();
-        auto resp = drogon::HttpResponse::newHttpJsonResponse(ret);
-        resp->setStatusCode(drogon::HttpStatusCode::k201Created);
-        callback(resp);
+        drogon::orm::Mapper<USR> mapper(dbClientPtr);
+        mapper.insert(
+            object,
+            [callbackPtr, &origin](USR newObject)
+            {
+                Json::Value ret;
+                auto resp = drogon::HttpResponse::newHttpJsonResponse(ret);
+                resp->setStatusCode(drogon::k201Created);
+                resp->addHeader("Access-Control-Allow-Origin", origin);
+                (*callbackPtr)(resp);
+            },
+            [callbackPtr, &origin](const drogon::orm::DrogonDbException &e)
+            {
+                LOG_ERROR << e.base().what();
+                Json::Value ret;
+                ret["error"] = "database error";
+                auto resp = drogon::HttpResponse::newHttpJsonResponse(ret);
+                resp->setStatusCode(drogon::k500InternalServerError);
+                resp->addHeader("Access-Control-Allow-Origin", origin);
+                (*callbackPtr)(resp);   
+            });
     }
-    catch (const drogon::orm::DrogonDbException &e)
+    catch(const Json::Exception &e)
     {
-        LOG_ERROR << e.base().what();
-        Json::Value ret{};
-        ret["error"] = "database error";
+        LOG_ERROR << e.what();
+        Json::Value ret;
+        ret["error"] = "Field insert object";
+        auto resp= drogon::HttpResponse::newHttpJsonResponse(ret);
+        resp->setStatusCode(drogon::k400BadRequest);
+        resp->addHeader("Access-Control-Allow-Origin", origin);
+        return (*callbackPtr)(resp);     
+    }   
+}
+
+auto garden::User_c::login(const drogon::HttpRequestPtr &req, CALL &&callback) -> void const
+{
+    // name
+    // surname
+    // patronymic
+    // +phone
+    // +mail
+    // +password
+
+    //JSON req:
+    //login (phone or mail)
+    //password
+
+    LOG_DEBUG << "Enter reg()";
+    auto jsonPtr = req->jsonObject();
+    Json::Value &req_json = *jsonPtr;
+    auto &origin = req->getHeader("Origin");
+    auto callbackPtr = std::make_shared<CALL>(std::move(callback));
+    
+    if(!jsonPtr)
+    {
+        Json::Value ret;
+        ret["error"] = "No json object is found in the request";
         auto resp = drogon::HttpResponse::newHttpJsonResponse(ret);
-        resp->setStatusCode(drogon::HttpStatusCode::k500InternalServerError);
-        callback(resp);
+        resp->setStatusCode(drogon::k400BadRequest);
+        resp->addHeader("Access-Control-Allow-Origin", origin);
+        return (*callbackPtr)(resp);
     }
 
-    // std::string password0 = "top_secret";
+    if(std::string err; !Tools::user_validate_json_for_login(req_json, err))
+    {
+        Json::Value ret;
+        ret["error"] = err;
+        auto resp= drogon::HttpResponse::newHttpJsonResponse(ret);
+        resp->setStatusCode(drogon::k400BadRequest);
+        resp->addHeader("Access-Control-Allow-Origin", origin);
+        return (*callbackPtr)(resp);
+    }
 
-    // std::string hash = bcrypt::generateHash(password0);
+    try 
+    {
+        {
+            const std::string login_open = req_json["login"].asString();
+            const std::string login_close = Tools::rsa256_encrypt(login_open, key_private);
+            req_json["mail"]  = login_close;
+            req_json["phone"] = login_close;
+        }
+        
+        USR object = USR(req_json);
+        auto dbClientPtr = drogon::app().getDbClient();
+        drogon::orm::Mapper<USR> mapper(dbClientPtr);
+        const std::vector<USR> users = mapper.findBy(
+            drogon::orm::Criteria("mail", drogon::orm::CompareOperator::EQ, req_json["mail"].asString()) ||
+            drogon::orm::Criteria("phone", drogon::orm::CompareOperator::EQ, req_json["phone"].asString()));
 
-    // Json::Value ret;
-    // ret["result"] = "ok";
-    // ret["userId"] = userId;
-    // ret["psswd"] = password;
-    // ret["hash_psswd"] = hash;
-    // //ret["token"] = drogon::utils::getUuid();
-    // auto resp = drogon::HttpResponse::newHttpJsonResponse(ret);
-    // callback(resp);
+        Json::Value ret;
+        if(users.empty())
+        {
+            ret["message"] = "Login or password failed";
+            auto resp = drogon::HttpResponse::newHttpJsonResponse(ret);
+            resp->setStatusCode(drogon::k401Unauthorized);
+            resp->addHeader("Access-Control-Allow-Origin", origin);
+            return (*callbackPtr)(resp);
+        }
+        else if(users.size() != 1)
+        {
+            ret["message"] = "Login or password failed";
+            auto resp = drogon::HttpResponse::newHttpJsonResponse(ret);
+            resp->setStatusCode(drogon::k400BadRequest);
+            resp->addHeader("Access-Control-Allow-Origin", origin);
+            return (*callbackPtr)(resp);
+        }
+
+        const USR &user_find_db = users[0];
+        const std::string password_find_db = *(user_find_db.getPassword());
+        const std::string password_req = req_json["password"].asString();
+        if(!bcrypt::validatePassword(password_req, password_find_db))
+        {
+            ret["message"] = "Login or password failed";
+            auto resp = drogon::HttpResponse::newHttpJsonResponse(ret);
+            resp->setStatusCode(drogon::k401Unauthorized);
+            resp->addHeader("Access-Control-Allow-Origin", origin);
+            return (*callbackPtr)(resp);
+        }
+
+        {
+            // name
+            // surname
+            // patronymic
+            // +phone
+            // +mail
+            // +password
+            {
+                const std::string close = *(user_find_db.getName());
+                ret["user_db_name"] = Tools::rsa256_decrypt(close, key_public);
+            }
+            {
+                const std::string close = *(user_find_db.getSurname());
+                ret["user_db_surname"] = Tools::rsa256_decrypt(close, key_public);
+            }
+            {
+                const std::string close = *(user_find_db.getPatronymic());
+                ret["user_db_patronymic"] = Tools::rsa256_decrypt(close, key_public);
+            }
+            {
+                const std::string close = *(user_find_db.getPhone());
+                ret["user_db_phone"] = Tools::rsa256_decrypt(close, key_public);
+            }
+            {
+                const std::string close = *(user_find_db.getMail());
+                ret["user_db_mail"] = Tools::rsa256_decrypt(close, key_public);
+            }
+            ret["message"] = "Success";
+
+            //Set cookies or session start
+            auto resp = drogon::HttpResponse::newHttpJsonResponse(ret);
+            resp->setStatusCode(drogon::k200OK);
+            resp->addHeader("Access-Control-Allow-Origin", origin);
+            return (*callbackPtr)(resp);
+        }
+    }
+    catch(const Json::Exception &e)
+    {
+        LOG_ERROR << e.what();
+        Json::Value ret;
+        ret["error"] = "Field login";
+        auto resp = drogon::HttpResponse::newHttpJsonResponse(ret);
+        resp->setStatusCode(drogon::k400BadRequest);
+        resp->addHeader("Access-Control-Allow-Origin", origin);
+        return (*callbackPtr)(resp);
+    }
 }
 
-bool garden::User_c::areFieldsValid(const drogon_model::sqlite3::User &user) const
+auto garden::User_c::set_indicator(const drogon::HttpRequestPtr &req, CALL &&callback) -> void const
 {
-    return user.getName() != nullptr && user.getPassword() != nullptr;
-}
 
-bool garden::User_c::isUserAvailable(const drogon_model::sqlite3::User &user, drogon::orm::Mapper<drogon_model::sqlite3::User> &mp) const
-{
-    auto criteria = drogon::orm::Criteria(drogon_model::sqlite3::User::Cols::_name, drogon::orm::CompareOperator::EQ, user.getValueOfName());
-    return mp.findFutureBy(criteria).get().empty();
-}
+    // plot_number
+    // plot_password
+    // v1
+    // v2
+    
+    auto jsonPtr = req->jsonObject();
+    Json::Value &req_json = *jsonPtr;
+    auto &origin = req->getHeader("Origin");
+    auto callbackPtr = std::make_shared<CALL>(std::move(callback));
 
-bool garden::User_c::isPasswordValid(const std::string &text, const std::string &hash) const
-{
-    return bcrypt::validatePassword(text, hash);
-}
+    if(!jsonPtr)
+    {
+        Json::Value ret;
+        ret["error"] = "No json object is found in the request";
+        auto resp= drogon::HttpResponse::newHttpJsonResponse(ret);
+        resp->setStatusCode(drogon::k400BadRequest);
+        resp->addHeader("Access-Control-Allow-Origin", origin);
+        return (*callbackPtr)(resp);
+    }
 
-garden::User_c::UserWithToken::UserWithToken(const drogon_model::sqlite3::User &user)
-{
-    // auto *jwtPtr = drogon::app().getPlugin<JwtPlugin>();
-    // auto jwt = jwtPtr->init();
-    // token = jwt.encode("user_id", user.getValueOfId());
-    // username = user.getValueOfUsername();
-}
+    if(std::string err; !Tools::indicator_validate_json_for_login(req_json, err))
+    {
+        Json::Value ret;
+        ret["error"] = err;
+        auto resp= drogon::HttpResponse::newHttpJsonResponse(ret);
+        resp->setStatusCode(drogon::k400BadRequest);
+        resp->addHeader("Access-Control-Allow-Origin", origin);
+        return (*callbackPtr)(resp);
+    }
 
-Json::Value garden::User_c::UserWithToken::toJson()
-{
-    Json::Value ret{};
-    ret["username"] = username;
-    ret["token"] = token;
-    return ret;
+    try 
+    {
+        const std::string plot_number    = req_json["plot_number"].asString();
+        const std::string plot_password  = req_json["plot_password"].asString();
+        const std::string v1             = req_json["v1"].asString();
+        const std::string v2             = req_json["v2"].asString();
+
+        // USR object = USR(req_json);
+        // auto dbClientPtr = drogon::app().getDbClient();
+        // drogon::orm::Mapper<USR> mapper(dbClientPtr);
+        // mapper.insert(
+        //     object,
+        //     [callbackPtr, &origin](USR newObject)
+        //     {
+        //         Json::Value ret;
+        //         auto resp = drogon::HttpResponse::newHttpJsonResponse(ret);
+        //         resp->setStatusCode(drogon::k201Created);
+        //         resp->addHeader("Access-Control-Allow-Origin", origin);
+        //         (*callbackPtr)(resp);
+        //     },
+        //     [callbackPtr, &origin](const drogon::orm::DrogonDbException &e)
+        //     {
+        //         LOG_ERROR << e.base().what();
+        //         Json::Value ret;
+        //         ret["error"] = "database error";
+        //         auto resp = drogon::HttpResponse::newHttpJsonResponse(ret);
+        //         resp->setStatusCode(drogon::k500InternalServerError);
+        //         resp->addHeader("Access-Control-Allow-Origin", origin);
+        //         (*callbackPtr)(resp);   
+        //     });
+    }
+    catch(const Json::Exception &e)
+    {
+        LOG_ERROR << e.what();
+        Json::Value ret;
+        ret["error"] = "Field insert object";
+        auto resp= drogon::HttpResponse::newHttpJsonResponse(ret);
+        resp->setStatusCode(drogon::k400BadRequest);
+        resp->addHeader("Access-Control-Allow-Origin", origin);
+        return (*callbackPtr)(resp);     
+    }
 }

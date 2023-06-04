@@ -1,13 +1,19 @@
 #pragma once
 
-#include <drogon/HttpController.h>
+#include "drogon/HttpController.h"
+#include "drogon/orm/RestfulController.h"
 
 #include "models/User.h"
+#include "models/Indicator.h"
 
 #include "bcrypt.h"
+#include "tools/tools.h"
 
-//using namespace drogon;
+#include "OpenXLSX.hpp"
+
 using CALL = std::function<void(const drogon::HttpResponsePtr &)>;
+using USR = drogon_model::sqlite3::User;
+using INDI = drogon_model::sqlite3::Indicator;
 
 namespace garden
 {
@@ -20,28 +26,22 @@ namespace garden
       // METHOD_ADD(User::your_method_name, "/{1}/{2}/list", Get); // path is /garden/User/{arg1}/{arg2}/list
       // ADD_METHOD_TO(User::your_method_name, "/absolute/path/{1}/{2}/list", Get); // path is /absolute/path/{arg1}/{arg2}/list
 
-      METHOD_ADD(User_c::reg, "/reg?userId={1}&passwd={2}", drogon::Post);
+      METHOD_ADD(User_c::reg,             "/reg",             drogon::Post, drogon::Options);
+      METHOD_ADD(User_c::login,           "/login",           drogon::Post, drogon::Options);
+      METHOD_ADD(User_c::set_indicator,   "/set_indicator",   drogon::Post, drogon::Options);
 
       METHOD_LIST_END
       // your declaration of processing function maybe like this:
       // void get(const HttpRequestPtr& req, std::function<void (const HttpResponsePtr &)> &&callback, int p1, std::string p2);
       // void your_method_name(const HttpRequestPtr& req, std::function<void (const HttpResponsePtr &)> &&callback, double p1, int p2) const;
 
-      auto reg(const drogon::HttpRequestPtr &req,
-               CALL &&callback,
-               drogon_model::sqlite3::User &&pUser) -> void const;
+      User_c();
+      auto reg(const drogon::HttpRequestPtr &req, CALL &&callback) -> void const;
+      auto login(const drogon::HttpRequestPtr &req, CALL &&callback) -> void const;
+      auto set_indicator(const drogon::HttpRequestPtr &req, CALL &&callback) -> void const;
+
     private:
-
-      struct UserWithToken {
-          std::string username;
-          std::string password;
-          std::string token;
-          explicit UserWithToken(const drogon_model::sqlite3::User &user);
-          Json::Value toJson();
-      };
-
-      bool areFieldsValid(const drogon_model::sqlite3::User &user) const;
-      bool isUserAvailable(const drogon_model::sqlite3::User &user, drogon::orm::Mapper<drogon_model::sqlite3::User> &mp) const;
-      bool isPasswordValid(const std::string &text, const std::string &hash) const;
+      std::string key_private;
+      std::string key_public;
   };
 }

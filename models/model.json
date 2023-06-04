@@ -1,95 +1,89 @@
 {
-    //rdbms: Server type, postgresql,mysql or sqlite3, "postgresql" by default
     "rdbms": "sqlite3",
-    //filename: Sqlite3 db file name
     "filename": "../db/garden.db",
-    //is_fast: false by default, if it is true, the client is faster but user can't call
-    //any synchronous interface of it.
     "is_fast": false,
-    //number_of_connections: 1 by default, if the 'is_fast' is true, the number is the number of  
-    //connections per IO thread, otherwise it is the total number of all connections.  
     "number_of_connections": 1,
-    //timeout: -1.0 by default, in seconds, the timeout for executing a SQL query.
-    //zero or negative value means no timeout.
     "timeout": -1.0,
-    //"auto_batch": this feature is only available for the PostgreSQL driver(version >= 14.0), see
-    // the wiki for more details.
     "auto_batch": false,
-    //table: An array of tables to be modelized. if the array is empty, all revealed tables are modelized.
     "tables": [],
     //convert: the value can be changed by a function call before it is stored into database or
     //after it is read from database
-    "convert":
+    // "convert":
+    // {
+    //   "enabled": false,
+    //   "items":
+    //   [
+    //     {
+    //       "table": "user",
+    //       "column": "password",
+    //       "method": {
+    //         //after_db_read: name of the method which is called after reading from database, signature: void([const] std::shared_ptr [&])
+    //         "after_db_read": "decrypt_password",
+    //         //before_db_write: name of the method which is called before writing to database, signature: void([const] std::shared_ptr [&])
+    //         "before_db_write": "encrypt_password"
+    //       },
+    //       "includes": [
+    //         "\"file_local_search_path.h\"","<file_in_global_search_path.h>"
+    //       ]
+    //     }
+    //   ]
+    // },
+    "relationships":
     {
-      "enabled": false,
+      "enabled": true,
       "items":
       [
         {
-          "table": "user",
-          "column": "password",
-          "method": {
-            //after_db_read: name of the method which is called after reading from database, signature: void([const] std::shared_ptr [&])
-            "after_db_read": "decrypt_password",
-            //before_db_write: name of the method which is called before writing to database, signature: void([const] std::shared_ptr [&])
-            "before_db_write": "encrypt_password"
-          },
-          "includes": [
-            "\"file_local_search_path.h\"","<file_in_global_search_path.h>"
-          ]
+            "type": "has one",
+            "original_table_name": "Role",
+            "original_table_alias": "",
+            "original_key": "id",
+            "target_table_name": "User",
+            "target_table_alias": "",
+            "target_key": "id_role",
+            "enable_reverse": true
+        },
+        {
+          "type": "has many",
+          "original_table_name": "User",
+          "original_table_alias": "",
+          "original_key": "id",
+          "target_table_name": "User_To_Plot",
+          "target_table_alias": "",
+          "target_key": "id_user",
+          "enable_reverse": true
+        },
+        {
+          "type": "has many",
+          "original_table_name": "Plot",
+          "original_table_alias": "",
+          "original_key": "id",
+          "target_table_name": "User_To_Plot",
+          "target_table_alias": "",
+          "target_key": "id_plot",
+          "enable_reverse": true
+        },
+        {
+          "type": "has many",
+          "original_table_name": "Plot",
+          "original_table_alias": "",
+          "original_key": "id",
+          "target_table_name": "Counter",
+          "target_table_alias": "",
+          "target_key": "id_plot",
+          "enable_reverse": true
+        },
+        {
+          "type": "has many",
+          "original_table_name": "Counter",
+          "original_table_alias": "",
+          "original_key": "id",
+          "target_table_name": "Indicator",
+          "target_table_alias": "",
+          "target_key": "id_counter",
+          "enable_reverse": true
         }
       ]
-    },
-    "relationships":
-    {
-        "enabled": true,
-        "items":
-        [
-            {
-                "type": "has many",
-                "original_table_name": "User",
-                "original_table_alias": "",
-                "original_key": "id",
-                "target_table_name": "Indication",
-                "target_table_alias": "",
-                "target_key": "id_user",
-                "enable_reverse": true
-            }
-            // {
-            //     "type": "has one",
-            //     "original_table_name": "products",
-            //     "original_table_alias": "product",
-            //     "original_key": "id",
-            //     "target_table_name": "skus",
-            //     "target_table_alias": "SKU",
-            //     "target_key": "product_id",
-            //     "enable_reverse": true
-            // },
-            // {
-            //     "type": "has many",
-            //     "original_table_name": "products",
-            //     "original_table_alias": "product",
-            //     "original_key": "id",
-            //     "target_table_name": "reviews",
-            //     "target_table_alias": "",
-            //     "target_key": "product_id",
-            //     "enable_reverse": true
-            // },
-            // {
-            //     "type": "many to many",
-            //     "original_table_name": "products",
-            //     "original_table_alias": "",
-            //     "original_key": "id",
-            //     "pivot_table": {
-            //         "table_name": "carts_products",
-            //         "original_key": "product_id",
-            //         "target_key": "cart_id"
-            //     },
-            //     "target_table_name": "carts",
-            //     "target_table_alias": "",
-            //     "target_key": "id",
-            //     "enable_reverse": true
-            // }
-        ]
     },
     "restful_api_controllers":
     {

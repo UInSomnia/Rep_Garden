@@ -6,7 +6,7 @@ auto Test::test(const drogon::HttpRequestPtr &req,
 {
     Json::Value ret;
     ret["result"] = "ok";
-    ret["token"] = drogon::utils::getUuid();
+    ret["token"] = "Привет, Женя!";
     auto resp = drogon::HttpResponse::newHttpJsonResponse(ret);
     callback(resp);
 }

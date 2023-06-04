@@ -8,6 +8,12 @@ int main()
     //boost::variant<int, std::string> my_var_t;
     //Load config file
     drogon::app().loadConfigFile("../config.json");
+    // drogon::app().registerPostHandlingAdvice(
+    //     [](const drogon::HttpRequestPtr &req, const drogon::HttpResponsePtr &resp)
+    //     {
+    //         LOG_DEBUG << "postHandling1";
+    //         resp->addHeader("Access-Control-Allow-Origin", "*");
+    //     });
     //Run HTTP framework,the method will block in the internal event loop
     drogon::app().run();
     return 0;

@@ -36,7 +36,8 @@ namespace drogon_model
 {
 namespace sqlite3
 {
-class Indication;
+class Role;
+class UserToPlot;
 
 class User
 {
@@ -44,12 +45,14 @@ class User
     struct Cols
     {
         static const std::string _id;
+        static const std::string _id_role;
         static const std::string _name;
         static const std::string _surname;
         static const std::string _patronymic;
         static const std::string _phone;
         static const std::string _mail;
         static const std::string _password;
+        static const std::string _is_banned;
     };
 
     const static int primaryKeyNumber;
@@ -108,6 +111,16 @@ class User
     const std::shared_ptr<uint64_t> &getId() const noexcept;
     ///Set the value of the column id
     void setId(const uint64_t &pId) noexcept;
+    void setIdToNull() noexcept;
+
+    /**  For column id_role  */
+    ///Get the value of the column id_role, returns the default value if the column is null
+    const uint64_t &getValueOfIdRole() const noexcept;
+    ///Return a shared_ptr object pointing to the column const value, or an empty shared_ptr object if the column is null
+    const std::shared_ptr<uint64_t> &getIdRole() const noexcept;
+    ///Set the value of the column id_role
+    void setIdRole(const uint64_t &pIdRole) noexcept;
+    void setIdRoleToNull() noexcept;
 
     /**  For column name  */
     ///Get the value of the column name, returns the default value if the column is null
@@ -169,16 +182,29 @@ class User
     void setPassword(std::string &&pPassword) noexcept;
     void setPasswordToNull() noexcept;
 
+    /**  For column is_banned  */
+    ///Get the value of the column is_banned, returns the default value if the column is null
+    const uint64_t &getValueOfIsBanned() const noexcept;
+    ///Return a shared_ptr object pointing to the column const value, or an empty shared_ptr object if the column is null
+    const std::shared_ptr<uint64_t> &getIsBanned() const noexcept;
+    ///Set the value of the column is_banned
+    void setIsBanned(const uint64_t &pIsBanned) noexcept;
+    void setIsBannedToNull() noexcept;
 
-    static size_t getColumnNumber() noexcept {  return 7;  }
+
+    static size_t getColumnNumber() noexcept {  return 9;  }
     static const std::string &getColumnName(size_t index) noexcept(false);
 
     Json::Value toJson() const;
     Json::Value toMasqueradedJson(const std::vector<std::string> &pMasqueradingVector) const;
     /// Relationship interfaces
-    std::vector<Indication> getIndication(const drogon::orm::DbClientPtr &clientPtr) const;
-    void getIndication(const drogon::orm::DbClientPtr &clientPtr,
-                       const std::function<void(std::vector<Indication>)> &rcb,
+    Role getRole(const drogon::orm::DbClientPtr &clientPtr) const;
+    void getRole(const drogon::orm::DbClientPtr &clientPtr,
+                 const std::function<void(Role)> &rcb,
+                 const drogon::orm::ExceptionCallback &ecb) const;
+    std::vector<UserToPlot> getUserToPlot(const drogon::orm::DbClientPtr &clientPtr) const;
+    void getUserToPlot(const drogon::orm::DbClientPtr &clientPtr,
+                       const std::function<void(std::vector<UserToPlot>)> &rcb,
                        const drogon::orm::ExceptionCallback &ecb) const;
   private:
     friend drogon::orm::Mapper<User>;
@@ -192,12 +218,14 @@ class User
     ///For mysql or sqlite3
     void updateId(const uint64_t id);
     std::shared_ptr<uint64_t> id_;
+    std::shared_ptr<uint64_t> idRole_;
     std::shared_ptr<std::string> name_;
     std::shared_ptr<std::string> surname_;
     std::shared_ptr<std::string> patronymic_;
     std::shared_ptr<std::string> phone_;
     std::shared_ptr<std::string> mail_;
     std::shared_ptr<std::string> password_;
+    std::shared_ptr<uint64_t> isBanned_;
     struct MetaData
     {
         const std::string colName_;
@@ -209,7 +237,7 @@ class User
         const bool notNull_;
     };
     static const std::vector<MetaData> metaData_;
-    bool dirtyFlag_[7]={ false };
+    bool dirtyFlag_[9]={ false };
   public:
     static const std::string &sqlForFindingByPrimaryKey()
     {
@@ -229,32 +257,42 @@ class User
         needSelection = false;
         if(dirtyFlag_[1])
         {
-            sql += "name,";
+            sql += "id_role,";
             ++parametersCount;
         }
         if(dirtyFlag_[2])
         {
-            sql += "surname,";
+            sql += "name,";
             ++parametersCount;
         }
         if(dirtyFlag_[3])
         {
-            sql += "patronymic,";
+            sql += "surname,";
             ++parametersCount;
         }
         if(dirtyFlag_[4])
         {
-            sql += "phone,";
+            sql += "patronymic,";
             ++parametersCount;
         }
         if(dirtyFlag_[5])
         {
-            sql += "mail,";
+            sql += "phone,";
             ++parametersCount;
         }
         if(dirtyFlag_[6])
         {
+            sql += "mail,";
+            ++parametersCount;
+        }
+        if(dirtyFlag_[7])
+        {
             sql += "password,";
+            ++parametersCount;
+        }
+        if(dirtyFlag_[8])
+        {
+            sql += "is_banned,";
             ++parametersCount;
         }
         if(parametersCount > 0)
@@ -291,6 +329,16 @@ class User
 
         }
         if(dirtyFlag_[6])
+        {
+            sql.append("?,");
+
+        }
+        if(dirtyFlag_[7])
+        {
+            sql.append("?,");
+
+        }
+        if(dirtyFlag_[8])
         {
             sql.append("?,");
 
