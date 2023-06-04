@@ -7,6 +7,7 @@
 #include "models/Indicator.h"
 
 #include "boost/date_time/gregorian/gregorian.hpp"
+#include "boost/date_time/posix_time/posix_time.hpp"
 #include "bcrypt.h"
 #include "tools/tools.h"
 
@@ -42,6 +43,8 @@ namespace garden
       auto set_indicator(const drogon::HttpRequestPtr &req, CALL &&callback) -> void const;
 
       static auto date_to_string(const boost::gregorian::date& date, const std::locale &fmt) -> std::string;
+      static auto time_to_string(const boost::posix_time::ptime& time, boost::posix_time::time_facet *const fmt) -> std::string;
+      static auto string_to_int(const std::string &str, bool &ok) -> int32_t;
 
     private:
       std::string key_private;

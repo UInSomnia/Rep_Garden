@@ -92,16 +92,19 @@ auto garden::User_c::reg(const drogon::HttpRequestPtr &req, CALL &&callback) -> 
 
 
 
-    // boost::gregorian::date xGPWStart(1941, boost::gregorian::Jun, 22);
-    // boost::gregorian::date xNowdays = boost::gregorian::day_clock::local_day();
+    // // boost::gregorian::date xGPWStart(1941, boost::gregorian::Jun, 22);
+    // boost::gregorian::date   date_now = boost::gregorian::day_clock::local_day();
+    // boost::posix_time::ptime time_now = boost::posix_time::second_clock::local_time();
 
-    // const std::locale fmt(std::locale::classic(), new boost::gregorian::date_facet("%d.%m.%Y"));
-    // const std::string str_xGPWStart = date_to_string(xGPWStart, fmt);
-    // const std::string str_xNowdays = date_to_string(xNowdays, fmt);
+    // const std::locale date_fmt(std::locale::classic(), new boost::gregorian::date_facet("%d.%m.%Y"));
+    // boost::posix_time::time_facet *const time_fmt = new boost::posix_time::time_facet("%H:%M:%S");
+    // // const std::string str_xGPWStart = date_to_string(xGPWStart, fmt);
+    // const std::string str_date_now = date_to_string(date_now, date_fmt);
+    // const std::string str_time_now = time_to_string(time_now, time_fmt);
 
     // Json::Value ret;
-    // ret["xGPWStart"] = str_xGPWStart;
-    // ret["xNowdays"] = str_xNowdays;
+    // ret["str_date_now"] = str_date_now;
+    // ret["str_time_now"] = str_time_now;
     // auto resp= drogon::HttpResponse::newHttpJsonResponse(ret);
     // resp->setStatusCode(drogon::k200OK);
     // resp->addHeader("Access-Control-Allow-Origin", origin);
@@ -387,29 +390,70 @@ auto garden::User_c::set_indicator(const drogon::HttpRequestPtr &req, CALL &&cal
         const std::string v1             = req_json["v1"].asString();
         const std::string v2             = req_json["v2"].asString();
 
-        // USR object = USR(req_json);
-        // auto dbClientPtr = drogon::app().getDbClient();
-        // drogon::orm::Mapper<USR> mapper(dbClientPtr);
-        // mapper.insert(
-        //     object,
-        //     [callbackPtr, &origin](USR newObject)
-        //     {
-        //         Json::Value ret;
-        //         auto resp = drogon::HttpResponse::newHttpJsonResponse(ret);
-        //         resp->setStatusCode(drogon::k201Created);
-        //         resp->addHeader("Access-Control-Allow-Origin", origin);
-        //         (*callbackPtr)(resp);
-        //     },
-        //     [callbackPtr, &origin](const drogon::orm::DrogonDbException &e)
-        //     {
-        //         LOG_ERROR << e.base().what();
-        //         Json::Value ret;
-        //         ret["error"] = "database error";
-        //         auto resp = drogon::HttpResponse::newHttpJsonResponse(ret);
-        //         resp->setStatusCode(drogon::k500InternalServerError);
-        //         resp->addHeader("Access-Control-Allow-Origin", origin);
-        //         (*callbackPtr)(resp);   
-        //     });
+        bool ok_v1 = false;
+        const int32_t num_v1             = string_to_int(v1, ok_v1);
+        bool ok_v2 = false;
+        const int32_t num_v2             = string_to_int(v2, ok_v2);
+        if(!ok_v1 || !ok_v2)
+        {
+            Json::Value ret;
+            ret["error"] = "v1 or v2 can't convert to integer";
+            auto resp= drogon::HttpResponse::newHttpJsonResponse(ret);
+            resp->setStatusCode(drogon::k400BadRequest);
+            resp->addHeader("Access-Control-Allow-Origin", origin);
+            return (*callbackPtr)(resp);  
+        }
+
+        const boost::gregorian::date   date_now = boost::gregorian::day_clock::local_day();
+        const boost::posix_time::ptime time_now = boost::posix_time::second_clock::local_time();
+        const tm tm_time_now = boost::posix_time::to_tm(time_now);
+
+        const int16_t year      = date_now.year();
+        const int16_t month     = date_now.month();
+        const int16_t day       = date_now.day();
+        const int16_t hour      = tm_time_now.tm_hour;
+        const int16_t minute    = tm_time_now.tm_min;
+        const int16_t second    = tm_time_now.tm_sec;
+
+        Json::Value json_indicator;
+        json_indicator["id_counter"]    = 1;
+        json_indicator["year"]          = year;
+        json_indicator["month"]         = month;
+        json_indicator["day"]           = day;
+        json_indicator["hour"]          = hour;
+        json_indicator["minute"]        = minute;
+        json_indicator["second"]        = second;
+        json_indicator["T1"]            = num_v1;
+        json_indicator["T2"]            = num_v2;
+
+        // auto resp = drogon::HttpResponse::newHttpJsonResponse(json_indicator);
+        // resp->setStatusCode(drogon::k201Created);
+        // resp->addHeader("Access-Control-Allow-Origin", origin);
+        // return (*callbackPtr)(resp);
+
+        INDI object = INDI(json_indicator);
+        auto dbClientPtr = drogon::app().getDbClient();
+        drogon::orm::Mapper<INDI> mapper(dbClientPtr);
+        mapper.insert(
+            object,
+            [callbackPtr, &origin](INDI newObject)
+            {
+                Json::Value ret;
+                auto resp = drogon::HttpResponse::newHttpJsonResponse(ret);
+                resp->setStatusCode(drogon::k201Created);
+                resp->addHeader("Access-Control-Allow-Origin", origin);
+                (*callbackPtr)(resp);
+            },
+            [callbackPtr, &origin](const drogon::orm::DrogonDbException &e)
+            {
+                LOG_ERROR << e.base().what();
+                Json::Value ret;
+                ret["error"] = "database error";
+                auto resp = drogon::HttpResponse::newHttpJsonResponse(ret);
+                resp->setStatusCode(drogon::k500InternalServerError);
+                resp->addHeader("Access-Control-Allow-Origin", origin);
+                (*callbackPtr)(resp);   
+            });
     }
     catch(const Json::Exception &e)
     {
@@ -429,4 +473,37 @@ auto garden::User_c::date_to_string(const boost::gregorian::date& date, const st
     os.imbue(fmt);
     os << date;
     return os.str();
+}
+
+auto garden::User_c::time_to_string(const boost::posix_time::ptime& time, boost::posix_time::time_facet *const fmt) -> std::string
+{
+    std::ostringstream msg;
+    msg.imbue(std::locale(msg.getloc(), fmt));
+    msg << time;
+    return msg.str();
+}
+
+auto garden::User_c::string_to_int(const std::string &str, bool &ok) -> int32_t
+{
+    ok = false;
+    size_t pos = -1;
+    int32_t result = -1;
+    try
+    {
+        result = std::stoi(str, &pos);
+    }
+    catch(const std::exception& e)
+    {
+        ok = false;
+        return -1;
+    }
+    const int32_t len = str.length();
+    if(pos != len)
+    {
+        ok = false;
+        return -1;
+    }
+
+    ok = true;
+    return result;
 }

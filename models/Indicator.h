@@ -45,8 +45,12 @@ class Indicator
     {
         static const std::string _id;
         static const std::string _id_counter;
-        static const std::string _month;
         static const std::string _year;
+        static const std::string _month;
+        static const std::string _day;
+        static const std::string _hour;
+        static const std::string _minute;
+        static const std::string _second;
         static const std::string _T1;
         static const std::string _T2;
     };
@@ -118,6 +122,15 @@ class Indicator
     void setIdCounter(const uint64_t &pIdCounter) noexcept;
     void setIdCounterToNull() noexcept;
 
+    /**  For column year  */
+    ///Get the value of the column year, returns the default value if the column is null
+    const uint64_t &getValueOfYear() const noexcept;
+    ///Return a shared_ptr object pointing to the column const value, or an empty shared_ptr object if the column is null
+    const std::shared_ptr<uint64_t> &getYear() const noexcept;
+    ///Set the value of the column year
+    void setYear(const uint64_t &pYear) noexcept;
+    void setYearToNull() noexcept;
+
     /**  For column month  */
     ///Get the value of the column month, returns the default value if the column is null
     const uint64_t &getValueOfMonth() const noexcept;
@@ -127,14 +140,41 @@ class Indicator
     void setMonth(const uint64_t &pMonth) noexcept;
     void setMonthToNull() noexcept;
 
-    /**  For column year  */
-    ///Get the value of the column year, returns the default value if the column is null
-    const uint64_t &getValueOfYear() const noexcept;
+    /**  For column day  */
+    ///Get the value of the column day, returns the default value if the column is null
+    const uint64_t &getValueOfDay() const noexcept;
     ///Return a shared_ptr object pointing to the column const value, or an empty shared_ptr object if the column is null
-    const std::shared_ptr<uint64_t> &getYear() const noexcept;
-    ///Set the value of the column year
-    void setYear(const uint64_t &pYear) noexcept;
-    void setYearToNull() noexcept;
+    const std::shared_ptr<uint64_t> &getDay() const noexcept;
+    ///Set the value of the column day
+    void setDay(const uint64_t &pDay) noexcept;
+    void setDayToNull() noexcept;
+
+    /**  For column hour  */
+    ///Get the value of the column hour, returns the default value if the column is null
+    const uint64_t &getValueOfHour() const noexcept;
+    ///Return a shared_ptr object pointing to the column const value, or an empty shared_ptr object if the column is null
+    const std::shared_ptr<uint64_t> &getHour() const noexcept;
+    ///Set the value of the column hour
+    void setHour(const uint64_t &pHour) noexcept;
+    void setHourToNull() noexcept;
+
+    /**  For column minute  */
+    ///Get the value of the column minute, returns the default value if the column is null
+    const uint64_t &getValueOfMinute() const noexcept;
+    ///Return a shared_ptr object pointing to the column const value, or an empty shared_ptr object if the column is null
+    const std::shared_ptr<uint64_t> &getMinute() const noexcept;
+    ///Set the value of the column minute
+    void setMinute(const uint64_t &pMinute) noexcept;
+    void setMinuteToNull() noexcept;
+
+    /**  For column second  */
+    ///Get the value of the column second, returns the default value if the column is null
+    const uint64_t &getValueOfSecond() const noexcept;
+    ///Return a shared_ptr object pointing to the column const value, or an empty shared_ptr object if the column is null
+    const std::shared_ptr<uint64_t> &getSecond() const noexcept;
+    ///Set the value of the column second
+    void setSecond(const uint64_t &pSecond) noexcept;
+    void setSecondToNull() noexcept;
 
     /**  For column T1  */
     ///Get the value of the column T1, returns the default value if the column is null
@@ -155,7 +195,7 @@ class Indicator
     void setT2ToNull() noexcept;
 
 
-    static size_t getColumnNumber() noexcept {  return 6;  }
+    static size_t getColumnNumber() noexcept {  return 10;  }
     static const std::string &getColumnName(size_t index) noexcept(false);
 
     Json::Value toJson() const;
@@ -178,8 +218,12 @@ class Indicator
     void updateId(const uint64_t id);
     std::shared_ptr<uint64_t> id_;
     std::shared_ptr<uint64_t> idCounter_;
-    std::shared_ptr<uint64_t> month_;
     std::shared_ptr<uint64_t> year_;
+    std::shared_ptr<uint64_t> month_;
+    std::shared_ptr<uint64_t> day_;
+    std::shared_ptr<uint64_t> hour_;
+    std::shared_ptr<uint64_t> minute_;
+    std::shared_ptr<uint64_t> second_;
     std::shared_ptr<uint64_t> t1_;
     std::shared_ptr<uint64_t> t2_;
     struct MetaData
@@ -193,7 +237,7 @@ class Indicator
         const bool notNull_;
     };
     static const std::vector<MetaData> metaData_;
-    bool dirtyFlag_[6]={ false };
+    bool dirtyFlag_[10]={ false };
   public:
     static const std::string &sqlForFindingByPrimaryKey()
     {
@@ -218,20 +262,40 @@ class Indicator
         }
         if(dirtyFlag_[2])
         {
-            sql += "month,";
+            sql += "year,";
             ++parametersCount;
         }
         if(dirtyFlag_[3])
         {
-            sql += "year,";
+            sql += "month,";
             ++parametersCount;
         }
         if(dirtyFlag_[4])
         {
-            sql += "T1,";
+            sql += "day,";
             ++parametersCount;
         }
         if(dirtyFlag_[5])
+        {
+            sql += "hour,";
+            ++parametersCount;
+        }
+        if(dirtyFlag_[6])
+        {
+            sql += "minute,";
+            ++parametersCount;
+        }
+        if(dirtyFlag_[7])
+        {
+            sql += "second,";
+            ++parametersCount;
+        }
+        if(dirtyFlag_[8])
+        {
+            sql += "T1,";
+            ++parametersCount;
+        }
+        if(dirtyFlag_[9])
         {
             sql += "T2,";
             ++parametersCount;
@@ -265,6 +329,26 @@ class Indicator
 
         }
         if(dirtyFlag_[5])
+        {
+            sql.append("?,");
+
+        }
+        if(dirtyFlag_[6])
+        {
+            sql.append("?,");
+
+        }
+        if(dirtyFlag_[7])
+        {
+            sql.append("?,");
+
+        }
+        if(dirtyFlag_[8])
+        {
+            sql.append("?,");
+
+        }
+        if(dirtyFlag_[9])
         {
             sql.append("?,");
 

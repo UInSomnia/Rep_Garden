@@ -16,8 +16,12 @@ using namespace drogon_model::sqlite3;
 
 const std::string Indicator::Cols::_id = "id";
 const std::string Indicator::Cols::_id_counter = "id_counter";
-const std::string Indicator::Cols::_month = "month";
 const std::string Indicator::Cols::_year = "year";
+const std::string Indicator::Cols::_month = "month";
+const std::string Indicator::Cols::_day = "day";
+const std::string Indicator::Cols::_hour = "hour";
+const std::string Indicator::Cols::_minute = "minute";
+const std::string Indicator::Cols::_second = "second";
 const std::string Indicator::Cols::_T1 = "T1";
 const std::string Indicator::Cols::_T2 = "T2";
 const std::string Indicator::primaryKeyName = "id";
@@ -27,8 +31,12 @@ const std::string Indicator::tableName = "indicator";
 const std::vector<typename Indicator::MetaData> Indicator::metaData_={
 {"id","uint64_t","integer",8,1,1,0},
 {"id_counter","uint64_t","integer",8,0,0,0},
-{"month","uint64_t","integer",8,0,0,0},
 {"year","uint64_t","integer",8,0,0,0},
+{"month","uint64_t","integer",8,0,0,0},
+{"day","uint64_t","integer",8,0,0,0},
+{"hour","uint64_t","integer",8,0,0,0},
+{"minute","uint64_t","integer",8,0,0,0},
+{"second","uint64_t","integer",8,0,0,0},
 {"T1","uint64_t","integer",8,0,0,0},
 {"T2","uint64_t","integer",8,0,0,0}
 };
@@ -49,13 +57,29 @@ Indicator::Indicator(const Row &r, const ssize_t indexOffset) noexcept
         {
             idCounter_=std::make_shared<uint64_t>(r["id_counter"].as<uint64_t>());
         }
+        if(!r["year"].isNull())
+        {
+            year_=std::make_shared<uint64_t>(r["year"].as<uint64_t>());
+        }
         if(!r["month"].isNull())
         {
             month_=std::make_shared<uint64_t>(r["month"].as<uint64_t>());
         }
-        if(!r["year"].isNull())
+        if(!r["day"].isNull())
         {
-            year_=std::make_shared<uint64_t>(r["year"].as<uint64_t>());
+            day_=std::make_shared<uint64_t>(r["day"].as<uint64_t>());
+        }
+        if(!r["hour"].isNull())
+        {
+            hour_=std::make_shared<uint64_t>(r["hour"].as<uint64_t>());
+        }
+        if(!r["minute"].isNull())
+        {
+            minute_=std::make_shared<uint64_t>(r["minute"].as<uint64_t>());
+        }
+        if(!r["second"].isNull())
+        {
+            second_=std::make_shared<uint64_t>(r["second"].as<uint64_t>());
         }
         if(!r["T1"].isNull())
         {
@@ -69,7 +93,7 @@ Indicator::Indicator(const Row &r, const ssize_t indexOffset) noexcept
     else
     {
         size_t offset = (size_t)indexOffset;
-        if(offset + 6 > r.size())
+        if(offset + 10 > r.size())
         {
             LOG_FATAL << "Invalid SQL result for this model";
             return;
@@ -88,19 +112,39 @@ Indicator::Indicator(const Row &r, const ssize_t indexOffset) noexcept
         index = offset + 2;
         if(!r[index].isNull())
         {
-            month_=std::make_shared<uint64_t>(r[index].as<uint64_t>());
+            year_=std::make_shared<uint64_t>(r[index].as<uint64_t>());
         }
         index = offset + 3;
         if(!r[index].isNull())
         {
-            year_=std::make_shared<uint64_t>(r[index].as<uint64_t>());
+            month_=std::make_shared<uint64_t>(r[index].as<uint64_t>());
         }
         index = offset + 4;
         if(!r[index].isNull())
         {
-            t1_=std::make_shared<uint64_t>(r[index].as<uint64_t>());
+            day_=std::make_shared<uint64_t>(r[index].as<uint64_t>());
         }
         index = offset + 5;
+        if(!r[index].isNull())
+        {
+            hour_=std::make_shared<uint64_t>(r[index].as<uint64_t>());
+        }
+        index = offset + 6;
+        if(!r[index].isNull())
+        {
+            minute_=std::make_shared<uint64_t>(r[index].as<uint64_t>());
+        }
+        index = offset + 7;
+        if(!r[index].isNull())
+        {
+            second_=std::make_shared<uint64_t>(r[index].as<uint64_t>());
+        }
+        index = offset + 8;
+        if(!r[index].isNull())
+        {
+            t1_=std::make_shared<uint64_t>(r[index].as<uint64_t>());
+        }
+        index = offset + 9;
         if(!r[index].isNull())
         {
             t2_=std::make_shared<uint64_t>(r[index].as<uint64_t>());
@@ -111,7 +155,7 @@ Indicator::Indicator(const Row &r, const ssize_t indexOffset) noexcept
 
 Indicator::Indicator(const Json::Value &pJson, const std::vector<std::string> &pMasqueradingVector) noexcept(false)
 {
-    if(pMasqueradingVector.size() != 6)
+    if(pMasqueradingVector.size() != 10)
     {
         LOG_ERROR << "Bad masquerading vector";
         return;
@@ -137,7 +181,7 @@ Indicator::Indicator(const Json::Value &pJson, const std::vector<std::string> &p
         dirtyFlag_[2] = true;
         if(!pJson[pMasqueradingVector[2]].isNull())
         {
-            month_=std::make_shared<uint64_t>((uint64_t)pJson[pMasqueradingVector[2]].asUInt64());
+            year_=std::make_shared<uint64_t>((uint64_t)pJson[pMasqueradingVector[2]].asUInt64());
         }
     }
     if(!pMasqueradingVector[3].empty() && pJson.isMember(pMasqueradingVector[3]))
@@ -145,7 +189,7 @@ Indicator::Indicator(const Json::Value &pJson, const std::vector<std::string> &p
         dirtyFlag_[3] = true;
         if(!pJson[pMasqueradingVector[3]].isNull())
         {
-            year_=std::make_shared<uint64_t>((uint64_t)pJson[pMasqueradingVector[3]].asUInt64());
+            month_=std::make_shared<uint64_t>((uint64_t)pJson[pMasqueradingVector[3]].asUInt64());
         }
     }
     if(!pMasqueradingVector[4].empty() && pJson.isMember(pMasqueradingVector[4]))
@@ -153,7 +197,7 @@ Indicator::Indicator(const Json::Value &pJson, const std::vector<std::string> &p
         dirtyFlag_[4] = true;
         if(!pJson[pMasqueradingVector[4]].isNull())
         {
-            t1_=std::make_shared<uint64_t>((uint64_t)pJson[pMasqueradingVector[4]].asUInt64());
+            day_=std::make_shared<uint64_t>((uint64_t)pJson[pMasqueradingVector[4]].asUInt64());
         }
     }
     if(!pMasqueradingVector[5].empty() && pJson.isMember(pMasqueradingVector[5]))
@@ -161,7 +205,39 @@ Indicator::Indicator(const Json::Value &pJson, const std::vector<std::string> &p
         dirtyFlag_[5] = true;
         if(!pJson[pMasqueradingVector[5]].isNull())
         {
-            t2_=std::make_shared<uint64_t>((uint64_t)pJson[pMasqueradingVector[5]].asUInt64());
+            hour_=std::make_shared<uint64_t>((uint64_t)pJson[pMasqueradingVector[5]].asUInt64());
+        }
+    }
+    if(!pMasqueradingVector[6].empty() && pJson.isMember(pMasqueradingVector[6]))
+    {
+        dirtyFlag_[6] = true;
+        if(!pJson[pMasqueradingVector[6]].isNull())
+        {
+            minute_=std::make_shared<uint64_t>((uint64_t)pJson[pMasqueradingVector[6]].asUInt64());
+        }
+    }
+    if(!pMasqueradingVector[7].empty() && pJson.isMember(pMasqueradingVector[7]))
+    {
+        dirtyFlag_[7] = true;
+        if(!pJson[pMasqueradingVector[7]].isNull())
+        {
+            second_=std::make_shared<uint64_t>((uint64_t)pJson[pMasqueradingVector[7]].asUInt64());
+        }
+    }
+    if(!pMasqueradingVector[8].empty() && pJson.isMember(pMasqueradingVector[8]))
+    {
+        dirtyFlag_[8] = true;
+        if(!pJson[pMasqueradingVector[8]].isNull())
+        {
+            t1_=std::make_shared<uint64_t>((uint64_t)pJson[pMasqueradingVector[8]].asUInt64());
+        }
+    }
+    if(!pMasqueradingVector[9].empty() && pJson.isMember(pMasqueradingVector[9]))
+    {
+        dirtyFlag_[9] = true;
+        if(!pJson[pMasqueradingVector[9]].isNull())
+        {
+            t2_=std::make_shared<uint64_t>((uint64_t)pJson[pMasqueradingVector[9]].asUInt64());
         }
     }
 }
@@ -184,25 +260,57 @@ Indicator::Indicator(const Json::Value &pJson) noexcept(false)
             idCounter_=std::make_shared<uint64_t>((uint64_t)pJson["id_counter"].asUInt64());
         }
     }
-    if(pJson.isMember("month"))
-    {
-        dirtyFlag_[2]=true;
-        if(!pJson["month"].isNull())
-        {
-            month_=std::make_shared<uint64_t>((uint64_t)pJson["month"].asUInt64());
-        }
-    }
     if(pJson.isMember("year"))
     {
-        dirtyFlag_[3]=true;
+        dirtyFlag_[2]=true;
         if(!pJson["year"].isNull())
         {
             year_=std::make_shared<uint64_t>((uint64_t)pJson["year"].asUInt64());
         }
     }
-    if(pJson.isMember("T1"))
+    if(pJson.isMember("month"))
+    {
+        dirtyFlag_[3]=true;
+        if(!pJson["month"].isNull())
+        {
+            month_=std::make_shared<uint64_t>((uint64_t)pJson["month"].asUInt64());
+        }
+    }
+    if(pJson.isMember("day"))
     {
         dirtyFlag_[4]=true;
+        if(!pJson["day"].isNull())
+        {
+            day_=std::make_shared<uint64_t>((uint64_t)pJson["day"].asUInt64());
+        }
+    }
+    if(pJson.isMember("hour"))
+    {
+        dirtyFlag_[5]=true;
+        if(!pJson["hour"].isNull())
+        {
+            hour_=std::make_shared<uint64_t>((uint64_t)pJson["hour"].asUInt64());
+        }
+    }
+    if(pJson.isMember("minute"))
+    {
+        dirtyFlag_[6]=true;
+        if(!pJson["minute"].isNull())
+        {
+            minute_=std::make_shared<uint64_t>((uint64_t)pJson["minute"].asUInt64());
+        }
+    }
+    if(pJson.isMember("second"))
+    {
+        dirtyFlag_[7]=true;
+        if(!pJson["second"].isNull())
+        {
+            second_=std::make_shared<uint64_t>((uint64_t)pJson["second"].asUInt64());
+        }
+    }
+    if(pJson.isMember("T1"))
+    {
+        dirtyFlag_[8]=true;
         if(!pJson["T1"].isNull())
         {
             t1_=std::make_shared<uint64_t>((uint64_t)pJson["T1"].asUInt64());
@@ -210,7 +318,7 @@ Indicator::Indicator(const Json::Value &pJson) noexcept(false)
     }
     if(pJson.isMember("T2"))
     {
-        dirtyFlag_[5]=true;
+        dirtyFlag_[9]=true;
         if(!pJson["T2"].isNull())
         {
             t2_=std::make_shared<uint64_t>((uint64_t)pJson["T2"].asUInt64());
@@ -221,7 +329,7 @@ Indicator::Indicator(const Json::Value &pJson) noexcept(false)
 void Indicator::updateByMasqueradedJson(const Json::Value &pJson,
                                             const std::vector<std::string> &pMasqueradingVector) noexcept(false)
 {
-    if(pMasqueradingVector.size() != 6)
+    if(pMasqueradingVector.size() != 10)
     {
         LOG_ERROR << "Bad masquerading vector";
         return;
@@ -246,7 +354,7 @@ void Indicator::updateByMasqueradedJson(const Json::Value &pJson,
         dirtyFlag_[2] = true;
         if(!pJson[pMasqueradingVector[2]].isNull())
         {
-            month_=std::make_shared<uint64_t>((uint64_t)pJson[pMasqueradingVector[2]].asUInt64());
+            year_=std::make_shared<uint64_t>((uint64_t)pJson[pMasqueradingVector[2]].asUInt64());
         }
     }
     if(!pMasqueradingVector[3].empty() && pJson.isMember(pMasqueradingVector[3]))
@@ -254,7 +362,7 @@ void Indicator::updateByMasqueradedJson(const Json::Value &pJson,
         dirtyFlag_[3] = true;
         if(!pJson[pMasqueradingVector[3]].isNull())
         {
-            year_=std::make_shared<uint64_t>((uint64_t)pJson[pMasqueradingVector[3]].asUInt64());
+            month_=std::make_shared<uint64_t>((uint64_t)pJson[pMasqueradingVector[3]].asUInt64());
         }
     }
     if(!pMasqueradingVector[4].empty() && pJson.isMember(pMasqueradingVector[4]))
@@ -262,7 +370,7 @@ void Indicator::updateByMasqueradedJson(const Json::Value &pJson,
         dirtyFlag_[4] = true;
         if(!pJson[pMasqueradingVector[4]].isNull())
         {
-            t1_=std::make_shared<uint64_t>((uint64_t)pJson[pMasqueradingVector[4]].asUInt64());
+            day_=std::make_shared<uint64_t>((uint64_t)pJson[pMasqueradingVector[4]].asUInt64());
         }
     }
     if(!pMasqueradingVector[5].empty() && pJson.isMember(pMasqueradingVector[5]))
@@ -270,7 +378,39 @@ void Indicator::updateByMasqueradedJson(const Json::Value &pJson,
         dirtyFlag_[5] = true;
         if(!pJson[pMasqueradingVector[5]].isNull())
         {
-            t2_=std::make_shared<uint64_t>((uint64_t)pJson[pMasqueradingVector[5]].asUInt64());
+            hour_=std::make_shared<uint64_t>((uint64_t)pJson[pMasqueradingVector[5]].asUInt64());
+        }
+    }
+    if(!pMasqueradingVector[6].empty() && pJson.isMember(pMasqueradingVector[6]))
+    {
+        dirtyFlag_[6] = true;
+        if(!pJson[pMasqueradingVector[6]].isNull())
+        {
+            minute_=std::make_shared<uint64_t>((uint64_t)pJson[pMasqueradingVector[6]].asUInt64());
+        }
+    }
+    if(!pMasqueradingVector[7].empty() && pJson.isMember(pMasqueradingVector[7]))
+    {
+        dirtyFlag_[7] = true;
+        if(!pJson[pMasqueradingVector[7]].isNull())
+        {
+            second_=std::make_shared<uint64_t>((uint64_t)pJson[pMasqueradingVector[7]].asUInt64());
+        }
+    }
+    if(!pMasqueradingVector[8].empty() && pJson.isMember(pMasqueradingVector[8]))
+    {
+        dirtyFlag_[8] = true;
+        if(!pJson[pMasqueradingVector[8]].isNull())
+        {
+            t1_=std::make_shared<uint64_t>((uint64_t)pJson[pMasqueradingVector[8]].asUInt64());
+        }
+    }
+    if(!pMasqueradingVector[9].empty() && pJson.isMember(pMasqueradingVector[9]))
+    {
+        dirtyFlag_[9] = true;
+        if(!pJson[pMasqueradingVector[9]].isNull())
+        {
+            t2_=std::make_shared<uint64_t>((uint64_t)pJson[pMasqueradingVector[9]].asUInt64());
         }
     }
 }
@@ -292,25 +432,57 @@ void Indicator::updateByJson(const Json::Value &pJson) noexcept(false)
             idCounter_=std::make_shared<uint64_t>((uint64_t)pJson["id_counter"].asUInt64());
         }
     }
-    if(pJson.isMember("month"))
-    {
-        dirtyFlag_[2] = true;
-        if(!pJson["month"].isNull())
-        {
-            month_=std::make_shared<uint64_t>((uint64_t)pJson["month"].asUInt64());
-        }
-    }
     if(pJson.isMember("year"))
     {
-        dirtyFlag_[3] = true;
+        dirtyFlag_[2] = true;
         if(!pJson["year"].isNull())
         {
             year_=std::make_shared<uint64_t>((uint64_t)pJson["year"].asUInt64());
         }
     }
-    if(pJson.isMember("T1"))
+    if(pJson.isMember("month"))
+    {
+        dirtyFlag_[3] = true;
+        if(!pJson["month"].isNull())
+        {
+            month_=std::make_shared<uint64_t>((uint64_t)pJson["month"].asUInt64());
+        }
+    }
+    if(pJson.isMember("day"))
     {
         dirtyFlag_[4] = true;
+        if(!pJson["day"].isNull())
+        {
+            day_=std::make_shared<uint64_t>((uint64_t)pJson["day"].asUInt64());
+        }
+    }
+    if(pJson.isMember("hour"))
+    {
+        dirtyFlag_[5] = true;
+        if(!pJson["hour"].isNull())
+        {
+            hour_=std::make_shared<uint64_t>((uint64_t)pJson["hour"].asUInt64());
+        }
+    }
+    if(pJson.isMember("minute"))
+    {
+        dirtyFlag_[6] = true;
+        if(!pJson["minute"].isNull())
+        {
+            minute_=std::make_shared<uint64_t>((uint64_t)pJson["minute"].asUInt64());
+        }
+    }
+    if(pJson.isMember("second"))
+    {
+        dirtyFlag_[7] = true;
+        if(!pJson["second"].isNull())
+        {
+            second_=std::make_shared<uint64_t>((uint64_t)pJson["second"].asUInt64());
+        }
+    }
+    if(pJson.isMember("T1"))
+    {
+        dirtyFlag_[8] = true;
         if(!pJson["T1"].isNull())
         {
             t1_=std::make_shared<uint64_t>((uint64_t)pJson["T1"].asUInt64());
@@ -318,7 +490,7 @@ void Indicator::updateByJson(const Json::Value &pJson) noexcept(false)
     }
     if(pJson.isMember("T2"))
     {
-        dirtyFlag_[5] = true;
+        dirtyFlag_[9] = true;
         if(!pJson["T2"].isNull())
         {
             t2_=std::make_shared<uint64_t>((uint64_t)pJson["T2"].asUInt64());
@@ -375,28 +547,6 @@ void Indicator::setIdCounterToNull() noexcept
     dirtyFlag_[1] = true;
 }
 
-const uint64_t &Indicator::getValueOfMonth() const noexcept
-{
-    const static uint64_t defaultValue = uint64_t();
-    if(month_)
-        return *month_;
-    return defaultValue;
-}
-const std::shared_ptr<uint64_t> &Indicator::getMonth() const noexcept
-{
-    return month_;
-}
-void Indicator::setMonth(const uint64_t &pMonth) noexcept
-{
-    month_ = std::make_shared<uint64_t>(pMonth);
-    dirtyFlag_[2] = true;
-}
-void Indicator::setMonthToNull() noexcept
-{
-    month_.reset();
-    dirtyFlag_[2] = true;
-}
-
 const uint64_t &Indicator::getValueOfYear() const noexcept
 {
     const static uint64_t defaultValue = uint64_t();
@@ -411,12 +561,122 @@ const std::shared_ptr<uint64_t> &Indicator::getYear() const noexcept
 void Indicator::setYear(const uint64_t &pYear) noexcept
 {
     year_ = std::make_shared<uint64_t>(pYear);
-    dirtyFlag_[3] = true;
+    dirtyFlag_[2] = true;
 }
 void Indicator::setYearToNull() noexcept
 {
     year_.reset();
+    dirtyFlag_[2] = true;
+}
+
+const uint64_t &Indicator::getValueOfMonth() const noexcept
+{
+    const static uint64_t defaultValue = uint64_t();
+    if(month_)
+        return *month_;
+    return defaultValue;
+}
+const std::shared_ptr<uint64_t> &Indicator::getMonth() const noexcept
+{
+    return month_;
+}
+void Indicator::setMonth(const uint64_t &pMonth) noexcept
+{
+    month_ = std::make_shared<uint64_t>(pMonth);
     dirtyFlag_[3] = true;
+}
+void Indicator::setMonthToNull() noexcept
+{
+    month_.reset();
+    dirtyFlag_[3] = true;
+}
+
+const uint64_t &Indicator::getValueOfDay() const noexcept
+{
+    const static uint64_t defaultValue = uint64_t();
+    if(day_)
+        return *day_;
+    return defaultValue;
+}
+const std::shared_ptr<uint64_t> &Indicator::getDay() const noexcept
+{
+    return day_;
+}
+void Indicator::setDay(const uint64_t &pDay) noexcept
+{
+    day_ = std::make_shared<uint64_t>(pDay);
+    dirtyFlag_[4] = true;
+}
+void Indicator::setDayToNull() noexcept
+{
+    day_.reset();
+    dirtyFlag_[4] = true;
+}
+
+const uint64_t &Indicator::getValueOfHour() const noexcept
+{
+    const static uint64_t defaultValue = uint64_t();
+    if(hour_)
+        return *hour_;
+    return defaultValue;
+}
+const std::shared_ptr<uint64_t> &Indicator::getHour() const noexcept
+{
+    return hour_;
+}
+void Indicator::setHour(const uint64_t &pHour) noexcept
+{
+    hour_ = std::make_shared<uint64_t>(pHour);
+    dirtyFlag_[5] = true;
+}
+void Indicator::setHourToNull() noexcept
+{
+    hour_.reset();
+    dirtyFlag_[5] = true;
+}
+
+const uint64_t &Indicator::getValueOfMinute() const noexcept
+{
+    const static uint64_t defaultValue = uint64_t();
+    if(minute_)
+        return *minute_;
+    return defaultValue;
+}
+const std::shared_ptr<uint64_t> &Indicator::getMinute() const noexcept
+{
+    return minute_;
+}
+void Indicator::setMinute(const uint64_t &pMinute) noexcept
+{
+    minute_ = std::make_shared<uint64_t>(pMinute);
+    dirtyFlag_[6] = true;
+}
+void Indicator::setMinuteToNull() noexcept
+{
+    minute_.reset();
+    dirtyFlag_[6] = true;
+}
+
+const uint64_t &Indicator::getValueOfSecond() const noexcept
+{
+    const static uint64_t defaultValue = uint64_t();
+    if(second_)
+        return *second_;
+    return defaultValue;
+}
+const std::shared_ptr<uint64_t> &Indicator::getSecond() const noexcept
+{
+    return second_;
+}
+void Indicator::setSecond(const uint64_t &pSecond) noexcept
+{
+    second_ = std::make_shared<uint64_t>(pSecond);
+    dirtyFlag_[7] = true;
+}
+void Indicator::setSecondToNull() noexcept
+{
+    second_.reset();
+    dirtyFlag_[7] = true;
 }
 
 const uint64_t &Indicator::getValueOfT1() const noexcept
@@ -433,12 +693,12 @@ const std::shared_ptr<uint64_t> &Indicator::getT1() const noexcept
 void Indicator::setT1(const uint64_t &pT1) noexcept
 {
     t1_ = std::make_shared<uint64_t>(pT1);
-    dirtyFlag_[4] = true;
+    dirtyFlag_[8] = true;
 }
 void Indicator::setT1ToNull() noexcept
 {
     t1_.reset();
-    dirtyFlag_[4] = true;
+    dirtyFlag_[8] = true;
 }
 
 const uint64_t &Indicator::getValueOfT2() const noexcept
@@ -455,12 +715,12 @@ const std::shared_ptr<uint64_t> &Indicator::getT2() const noexcept
 void Indicator::setT2(const uint64_t &pT2) noexcept
 {
     t2_ = std::make_shared<uint64_t>(pT2);
-    dirtyFlag_[5] = true;
+    dirtyFlag_[9] = true;
 }
 void Indicator::setT2ToNull() noexcept
 {
     t2_.reset();
-    dirtyFlag_[5] = true;
+    dirtyFlag_[9] = true;
 }
 
 void Indicator::updateId(const uint64_t id)
@@ -472,8 +732,12 @@ const std::vector<std::string> &Indicator::insertColumns() noexcept
 {
     static const std::vector<std::string> inCols={
         "id_counter",
-        "month",
         "year",
+        "month",
+        "day",
+        "hour",
+        "minute",
+        "second",
         "T1",
         "T2"
     };
@@ -495,17 +759,6 @@ void Indicator::outputArgs(drogon::orm::internal::SqlBinder &binder) const
     }
     if(dirtyFlag_[2])
     {
-        if(getMonth())
-        {
-            binder << getValueOfMonth();
-        }
-        else
-        {
-            binder << nullptr;
-        }
-    }
-    if(dirtyFlag_[3])
-    {
         if(getYear())
         {
             binder << getValueOfYear();
@@ -515,7 +768,62 @@ void Indicator::outputArgs(drogon::orm::internal::SqlBinder &binder) const
             binder << nullptr;
         }
     }
+    if(dirtyFlag_[3])
+    {
+        if(getMonth())
+        {
+            binder << getValueOfMonth();
+        }
+        else
+        {
+            binder << nullptr;
+        }
+    }
     if(dirtyFlag_[4])
+    {
+        if(getDay())
+        {
+            binder << getValueOfDay();
+        }
+        else
+        {
+            binder << nullptr;
+        }
+    }
+    if(dirtyFlag_[5])
+    {
+        if(getHour())
+        {
+            binder << getValueOfHour();
+        }
+        else
+        {
+            binder << nullptr;
+        }
+    }
+    if(dirtyFlag_[6])
+    {
+        if(getMinute())
+        {
+            binder << getValueOfMinute();
+        }
+        else
+        {
+            binder << nullptr;
+        }
+    }
+    if(dirtyFlag_[7])
+    {
+        if(getSecond())
+        {
+            binder << getValueOfSecond();
+        }
+        else
+        {
+            binder << nullptr;
+        }
+    }
+    if(dirtyFlag_[8])
     {
         if(getT1())
         {
@@ -526,7 +834,7 @@ void Indicator::outputArgs(drogon::orm::internal::SqlBinder &binder) const
             binder << nullptr;
         }
     }
-    if(dirtyFlag_[5])
+    if(dirtyFlag_[9])
     {
         if(getT2())
         {
@@ -562,6 +870,22 @@ const std::vector<std::string> Indicator::updateColumns() const
     {
         ret.push_back(getColumnName(5));
     }
+    if(dirtyFlag_[6])
+    {
+        ret.push_back(getColumnName(6));
+    }
+    if(dirtyFlag_[7])
+    {
+        ret.push_back(getColumnName(7));
+    }
+    if(dirtyFlag_[8])
+    {
+        ret.push_back(getColumnName(8));
+    }
+    if(dirtyFlag_[9])
+    {
+        ret.push_back(getColumnName(9));
+    }
     return ret;
 }
 
@@ -580,17 +904,6 @@ void Indicator::updateArgs(drogon::orm::internal::SqlBinder &binder) const
     }
     if(dirtyFlag_[2])
     {
-        if(getMonth())
-        {
-            binder << getValueOfMonth();
-        }
-        else
-        {
-            binder << nullptr;
-        }
-    }
-    if(dirtyFlag_[3])
-    {
         if(getYear())
         {
             binder << getValueOfYear();
@@ -600,7 +913,62 @@ void Indicator::updateArgs(drogon::orm::internal::SqlBinder &binder) const
             binder << nullptr;
         }
     }
+    if(dirtyFlag_[3])
+    {
+        if(getMonth())
+        {
+            binder << getValueOfMonth();
+        }
+        else
+        {
+            binder << nullptr;
+        }
+    }
     if(dirtyFlag_[4])
+    {
+        if(getDay())
+        {
+            binder << getValueOfDay();
+        }
+        else
+        {
+            binder << nullptr;
+        }
+    }
+    if(dirtyFlag_[5])
+    {
+        if(getHour())
+        {
+            binder << getValueOfHour();
+        }
+        else
+        {
+            binder << nullptr;
+        }
+    }
+    if(dirtyFlag_[6])
+    {
+        if(getMinute())
+        {
+            binder << getValueOfMinute();
+        }
+        else
+        {
+            binder << nullptr;
+        }
+    }
+    if(dirtyFlag_[7])
+    {
+        if(getSecond())
+        {
+            binder << getValueOfSecond();
+        }
+        else
+        {
+            binder << nullptr;
+        }
+    }
+    if(dirtyFlag_[8])
     {
         if(getT1())
         {
@@ -611,7 +979,7 @@ void Indicator::updateArgs(drogon::orm::internal::SqlBinder &binder) const
             binder << nullptr;
         }
     }
-    if(dirtyFlag_[5])
+    if(dirtyFlag_[9])
     {
         if(getT2())
         {
@@ -642,6 +1010,14 @@ Json::Value Indicator::toJson() const
     {
         ret["id_counter"]=Json::Value();
     }
+    if(getYear())
+    {
+        ret["year"]=(Json::UInt64)getValueOfYear();
+    }
+    else
+    {
+        ret["year"]=Json::Value();
+    }
     if(getMonth())
     {
         ret["month"]=(Json::UInt64)getValueOfMonth();
@@ -650,13 +1026,37 @@ Json::Value Indicator::toJson() const
     {
         ret["month"]=Json::Value();
     }
-    if(getYear())
+    if(getDay())
     {
-        ret["year"]=(Json::UInt64)getValueOfYear();
+        ret["day"]=(Json::UInt64)getValueOfDay();
     }
     else
     {
-        ret["year"]=Json::Value();
+        ret["day"]=Json::Value();
+    }
+    if(getHour())
+    {
+        ret["hour"]=(Json::UInt64)getValueOfHour();
+    }
+    else
+    {
+        ret["hour"]=Json::Value();
+    }
+    if(getMinute())
+    {
+        ret["minute"]=(Json::UInt64)getValueOfMinute();
+    }
+    else
+    {
+        ret["minute"]=Json::Value();
+    }
+    if(getSecond())
+    {
+        ret["second"]=(Json::UInt64)getValueOfSecond();
+    }
+    else
+    {
+        ret["second"]=Json::Value();
     }
     if(getT1())
     {
@@ -681,7 +1081,7 @@ Json::Value Indicator::toMasqueradedJson(
     const std::vector<std::string> &pMasqueradingVector) const
 {
     Json::Value ret;
-    if(pMasqueradingVector.size() == 6)
+    if(pMasqueradingVector.size() == 10)
     {
         if(!pMasqueradingVector[0].empty())
         {
@@ -707,9 +1107,9 @@ Json::Value Indicator::toMasqueradedJson(
         }
         if(!pMasqueradingVector[2].empty())
         {
-            if(getMonth())
+            if(getYear())
             {
-                ret[pMasqueradingVector[2]]=(Json::UInt64)getValueOfMonth();
+                ret[pMasqueradingVector[2]]=(Json::UInt64)getValueOfYear();
             }
             else
             {
@@ -718,9 +1118,9 @@ Json::Value Indicator::toMasqueradedJson(
         }
         if(!pMasqueradingVector[3].empty())
         {
-            if(getYear())
+            if(getMonth())
             {
-                ret[pMasqueradingVector[3]]=(Json::UInt64)getValueOfYear();
+                ret[pMasqueradingVector[3]]=(Json::UInt64)getValueOfMonth();
             }
             else
             {
@@ -729,9 +1129,9 @@ Json::Value Indicator::toMasqueradedJson(
         }
         if(!pMasqueradingVector[4].empty())
         {
-            if(getT1())
+            if(getDay())
             {
-                ret[pMasqueradingVector[4]]=(Json::UInt64)getValueOfT1();
+                ret[pMasqueradingVector[4]]=(Json::UInt64)getValueOfDay();
             }
             else
             {
@@ -740,13 +1140,57 @@ Json::Value Indicator::toMasqueradedJson(
         }
         if(!pMasqueradingVector[5].empty())
         {
-            if(getT2())
+            if(getHour())
             {
-                ret[pMasqueradingVector[5]]=(Json::UInt64)getValueOfT2();
+                ret[pMasqueradingVector[5]]=(Json::UInt64)getValueOfHour();
             }
             else
             {
                 ret[pMasqueradingVector[5]]=Json::Value();
+            }
+        }
+        if(!pMasqueradingVector[6].empty())
+        {
+            if(getMinute())
+            {
+                ret[pMasqueradingVector[6]]=(Json::UInt64)getValueOfMinute();
+            }
+            else
+            {
+                ret[pMasqueradingVector[6]]=Json::Value();
+            }
+        }
+        if(!pMasqueradingVector[7].empty())
+        {
+            if(getSecond())
+            {
+                ret[pMasqueradingVector[7]]=(Json::UInt64)getValueOfSecond();
+            }
+            else
+            {
+                ret[pMasqueradingVector[7]]=Json::Value();
+            }
+        }
+        if(!pMasqueradingVector[8].empty())
+        {
+            if(getT1())
+            {
+                ret[pMasqueradingVector[8]]=(Json::UInt64)getValueOfT1();
+            }
+            else
+            {
+                ret[pMasqueradingVector[8]]=Json::Value();
+            }
+        }
+        if(!pMasqueradingVector[9].empty())
+        {
+            if(getT2())
+            {
+                ret[pMasqueradingVector[9]]=(Json::UInt64)getValueOfT2();
+            }
+            else
+            {
+                ret[pMasqueradingVector[9]]=Json::Value();
             }
         }
         return ret;
@@ -768,6 +1212,14 @@ Json::Value Indicator::toMasqueradedJson(
     {
         ret["id_counter"]=Json::Value();
     }
+    if(getYear())
+    {
+        ret["year"]=(Json::UInt64)getValueOfYear();
+    }
+    else
+    {
+        ret["year"]=Json::Value();
+    }
     if(getMonth())
     {
         ret["month"]=(Json::UInt64)getValueOfMonth();
@@ -776,13 +1228,37 @@ Json::Value Indicator::toMasqueradedJson(
     {
         ret["month"]=Json::Value();
     }
-    if(getYear())
+    if(getDay())
     {
-        ret["year"]=(Json::UInt64)getValueOfYear();
+        ret["day"]=(Json::UInt64)getValueOfDay();
     }
     else
     {
-        ret["year"]=Json::Value();
+        ret["day"]=Json::Value();
+    }
+    if(getHour())
+    {
+        ret["hour"]=(Json::UInt64)getValueOfHour();
+    }
+    else
+    {
+        ret["hour"]=Json::Value();
+    }
+    if(getMinute())
+    {
+        ret["minute"]=(Json::UInt64)getValueOfMinute();
+    }
+    else
+    {
+        ret["minute"]=Json::Value();
+    }
+    if(getSecond())
+    {
+        ret["second"]=(Json::UInt64)getValueOfSecond();
+    }
+    else
+    {
+        ret["second"]=Json::Value();
     }
     if(getT1())
     {
@@ -815,24 +1291,44 @@ bool Indicator::validateJsonForCreation(const Json::Value &pJson, std::string &e
         if(!validJsonOfField(1, "id_counter", pJson["id_counter"], err, true))
             return false;
     }
-    if(pJson.isMember("month"))
-    {
-        if(!validJsonOfField(2, "month", pJson["month"], err, true))
-            return false;
-    }
     if(pJson.isMember("year"))
     {
-        if(!validJsonOfField(3, "year", pJson["year"], err, true))
+        if(!validJsonOfField(2, "year", pJson["year"], err, true))
+            return false;
+    }
+    if(pJson.isMember("month"))
+    {
+        if(!validJsonOfField(3, "month", pJson["month"], err, true))
+            return false;
+    }
+    if(pJson.isMember("day"))
+    {
+        if(!validJsonOfField(4, "day", pJson["day"], err, true))
+            return false;
+    }
+    if(pJson.isMember("hour"))
+    {
+        if(!validJsonOfField(5, "hour", pJson["hour"], err, true))
+            return false;
+    }
+    if(pJson.isMember("minute"))
+    {
+        if(!validJsonOfField(6, "minute", pJson["minute"], err, true))
+            return false;
+    }
+    if(pJson.isMember("second"))
+    {
+        if(!validJsonOfField(7, "second", pJson["second"], err, true))
             return false;
     }
     if(pJson.isMember("T1"))
     {
-        if(!validJsonOfField(4, "T1", pJson["T1"], err, true))
+        if(!validJsonOfField(8, "T1", pJson["T1"], err, true))
             return false;
     }
     if(pJson.isMember("T2"))
     {
-        if(!validJsonOfField(5, "T2", pJson["T2"], err, true))
+        if(!validJsonOfField(9, "T2", pJson["T2"], err, true))
             return false;
     }
     return true;
@@ -841,7 +1337,7 @@ bool Indicator::validateMasqueradedJsonForCreation(const Json::Value &pJson,
                                                    const std::vector<std::string> &pMasqueradingVector,
                                                    std::string &err)
 {
-    if(pMasqueradingVector.size() != 6)
+    if(pMasqueradingVector.size() != 10)
     {
         err = "Bad masquerading vector";
         return false;
@@ -895,6 +1391,38 @@ bool Indicator::validateMasqueradedJsonForCreation(const Json::Value &pJson,
                   return false;
           }
       }
+      if(!pMasqueradingVector[6].empty())
+      {
+          if(pJson.isMember(pMasqueradingVector[6]))
+          {
+              if(!validJsonOfField(6, pMasqueradingVector[6], pJson[pMasqueradingVector[6]], err, true))
+                  return false;
+          }
+      }
+      if(!pMasqueradingVector[7].empty())
+      {
+          if(pJson.isMember(pMasqueradingVector[7]))
+          {
+              if(!validJsonOfField(7, pMasqueradingVector[7], pJson[pMasqueradingVector[7]], err, true))
+                  return false;
+          }
+      }
+      if(!pMasqueradingVector[8].empty())
+      {
+          if(pJson.isMember(pMasqueradingVector[8]))
+          {
+              if(!validJsonOfField(8, pMasqueradingVector[8], pJson[pMasqueradingVector[8]], err, true))
+                  return false;
+          }
+      }
+      if(!pMasqueradingVector[9].empty())
+      {
+          if(pJson.isMember(pMasqueradingVector[9]))
+          {
+              if(!validJsonOfField(9, pMasqueradingVector[9], pJson[pMasqueradingVector[9]], err, true))
+                  return false;
+          }
+      }
     }
     catch(const Json::LogicError &e)
     {
@@ -920,24 +1448,44 @@ bool Indicator::validateJsonForUpdate(const Json::Value &pJson, std::string &err
         if(!validJsonOfField(1, "id_counter", pJson["id_counter"], err, false))
             return false;
     }
-    if(pJson.isMember("month"))
-    {
-        if(!validJsonOfField(2, "month", pJson["month"], err, false))
-            return false;
-    }
     if(pJson.isMember("year"))
     {
-        if(!validJsonOfField(3, "year", pJson["year"], err, false))
+        if(!validJsonOfField(2, "year", pJson["year"], err, false))
+            return false;
+    }
+    if(pJson.isMember("month"))
+    {
+        if(!validJsonOfField(3, "month", pJson["month"], err, false))
+            return false;
+    }
+    if(pJson.isMember("day"))
+    {
+        if(!validJsonOfField(4, "day", pJson["day"], err, false))
+            return false;
+    }
+    if(pJson.isMember("hour"))
+    {
+        if(!validJsonOfField(5, "hour", pJson["hour"], err, false))
+            return false;
+    }
+    if(pJson.isMember("minute"))
+    {
+        if(!validJsonOfField(6, "minute", pJson["minute"], err, false))
+            return false;
+    }
+    if(pJson.isMember("second"))
+    {
+        if(!validJsonOfField(7, "second", pJson["second"], err, false))
             return false;
     }
     if(pJson.isMember("T1"))
     {
-        if(!validJsonOfField(4, "T1", pJson["T1"], err, false))
+        if(!validJsonOfField(8, "T1", pJson["T1"], err, false))
             return false;
     }
     if(pJson.isMember("T2"))
     {
-        if(!validJsonOfField(5, "T2", pJson["T2"], err, false))
+        if(!validJsonOfField(9, "T2", pJson["T2"], err, false))
             return false;
     }
     return true;
@@ -946,7 +1494,7 @@ bool Indicator::validateMasqueradedJsonForUpdate(const Json::Value &pJson,
                                                  const std::vector<std::string> &pMasqueradingVector,
                                                  std::string &err)
 {
-    if(pMasqueradingVector.size() != 6)
+    if(pMasqueradingVector.size() != 10)
     {
         err = "Bad masquerading vector";
         return false;
@@ -985,6 +1533,26 @@ bool Indicator::validateMasqueradedJsonForUpdate(const Json::Value &pJson,
       if(!pMasqueradingVector[5].empty() && pJson.isMember(pMasqueradingVector[5]))
       {
           if(!validJsonOfField(5, pMasqueradingVector[5], pJson[pMasqueradingVector[5]], err, false))
+              return false;
+      }
+      if(!pMasqueradingVector[6].empty() && pJson.isMember(pMasqueradingVector[6]))
+      {
+          if(!validJsonOfField(6, pMasqueradingVector[6], pJson[pMasqueradingVector[6]], err, false))
+              return false;
+      }
+      if(!pMasqueradingVector[7].empty() && pJson.isMember(pMasqueradingVector[7]))
+      {
+          if(!validJsonOfField(7, pMasqueradingVector[7], pJson[pMasqueradingVector[7]], err, false))
+              return false;
+      }
+      if(!pMasqueradingVector[8].empty() && pJson.isMember(pMasqueradingVector[8]))
+      {
+          if(!validJsonOfField(8, pMasqueradingVector[8], pJson[pMasqueradingVector[8]], err, false))
+              return false;
+      }
+      if(!pMasqueradingVector[9].empty() && pJson.isMember(pMasqueradingVector[9]))
+      {
+          if(!validJsonOfField(9, pMasqueradingVector[9], pJson[pMasqueradingVector[9]], err, false))
               return false;
       }
     }
@@ -1064,6 +1632,50 @@ bool Indicator::validJsonOfField(size_t index,
             }
             break;
         case 5:
+            if(pJson.isNull())
+            {
+                return true;
+            }
+            if(!pJson.isUInt64())
+            {
+                err="Type error in the "+fieldName+" field";
+                return false;
+            }
+            break;
+        case 6:
+            if(pJson.isNull())
+            {
+                return true;
+            }
+            if(!pJson.isUInt64())
+            {
+                err="Type error in the "+fieldName+" field";
+                return false;
+            }
+            break;
+        case 7:
+            if(pJson.isNull())
+            {
+                return true;
+            }
+            if(!pJson.isUInt64())
+            {
+                err="Type error in the "+fieldName+" field";
+                return false;
+            }
+            break;
+        case 8:
+            if(pJson.isNull())
+            {
+                return true;
+            }
+            if(!pJson.isUInt64())
+            {
+                err="Type error in the "+fieldName+" field";
+                return false;
+            }
+            break;
+        case 9:
             if(pJson.isNull())
             {
                 return true;
